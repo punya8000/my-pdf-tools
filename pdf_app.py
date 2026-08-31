@@ -1,3 +1,6 @@
+import tempfile
+import os
+from pdf2docx import Converter
 import streamlit as st
 from pypdf import PdfWriter
 import io
