@@ -7,7 +7,15 @@ import fitz  # ไลบรารี PyMuPDF สำหรับแปลง PDF 
 
 # ตั้งค่าหน้าเว็บ
 st.set_page_config(page_title="My PDF Tools", page_icon="📄", layout="wide")
-
+# โค้ดสำหรับซ่อนเมนูและไอคอนด้านบนขวา
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            header {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # ==========================================
 # จัดการสถานะของเมนู (ทำให้กดปุ่มแล้วหน้าเปลี่ยน)
 # ==========================================
