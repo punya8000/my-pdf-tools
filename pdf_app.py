@@ -12,10 +12,10 @@ import fitz  # ไลบรารี PyMuPDF สำหรับแปลง PDF 
 st.set_page_config(page_title="My PDF Tools", page_icon="📄", layout="wide")
 
 # โค้ดสำหรับซ่อนเมนูและไอคอนด้านบนขวา
+# โค้ดสำหรับซ่อนเมนู (แก้ไขให้ปุ่มเปิดเมนูบนมือถือยังแสดงอยู่)
 hide_streamlit_style = """
             <style>
             #MainMenu {visibility: hidden;}
-            header {visibility: hidden;}
             footer {visibility: hidden;}
             </style>
             """
