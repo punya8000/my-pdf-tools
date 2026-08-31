@@ -10,6 +10,7 @@ import fitz  # ไลบรารี PyMuPDF สำหรับแปลง PDF 
 
 # ตั้งค่าหน้าเว็บ
 st.set_page_config(page_title="My PDF Tools", page_icon="📄", layout="wide")
+
 # โค้ดสำหรับซ่อนเมนูและไอคอนด้านบนขวา
 hide_streamlit_style = """
             <style>
@@ -19,6 +20,7 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # ==========================================
 # จัดการสถานะของเมนู (ทำให้กดปุ่มแล้วหน้าเปลี่ยน)
 # ==========================================
@@ -34,6 +36,8 @@ if st.sidebar.button("🖼️ รวมภาพเป็น PDF", use_container
     st.session_state.menu = "รวมภาพเป็น PDF"
 if st.sidebar.button("✂️ แยกหน้า PDF เป็นภาพ", use_container_width=True):
     st.session_state.menu = "แยกหน้า PDF"
+if st.sidebar.button("📝 แปลง PDF เป็น Word", use_container_width=True):
+    st.session_state.menu = "แปลง PDF เป็น Word"
 
 menu = st.session_state.menu
 
@@ -60,7 +64,7 @@ if menu == "รวมไฟล์ PDF":
             st.download_button("⬇️ ดาวน์โหลด PDF ที่รวมแล้ว", data=output_pdf.getvalue(), file_name="merged_output.pdf", mime="application/pdf")
 
 # ==========================================
-# 2. ฟังก์ชันแปลงภาพเป็น PDF (รองรับสูงสุด 400MB ตามที่รันใน Terminal)
+# 2. ฟังก์ชันแปลงภาพเป็น PDF 
 # ==========================================
 elif menu == "รวมภาพเป็น PDF":
     st.title("🖼️ รวมภาพเป็น PDF")
@@ -124,3 +128,48 @@ elif menu == "แยกหน้า PDF":
                 file_name="pdf_to_images.zip",
                 mime="application/zip"
             )
+
+# ==========================================
+# 4. ฟังก์ชันแปลง PDF เป็น Word
+# ==========================================
+elif menu == "แปลง PDF เป็น Word":
+    st.title("📝 แปลง PDF เป็น Word")
+    st.write("อัปโหลดไฟล์ PDF ระบบจะพยายามดึงข้อความและแปลงเป็นไฟล์ Word (.docx)")
+    
+    uploaded_pdf = st.file_uploader("เลือกไฟล์ PDF", type="pdf")
+    
+    if uploaded_pdf:
+        if st.button("แปลงเป็นไฟล์ Word"):
+            with st.spinner('กำลังแปลงไฟล์... อาจใช้เวลาสักครู่'):
+                # สร้างไฟล์ชั่วคราวเพื่อประมวลผล (pdf2docx ต้องการอ่านจากไฟล์จริง)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
+                    temp_pdf.write(uploaded_pdf.getvalue())
+                    temp_pdf_path = temp_pdf.name
+                
+                temp_docx_path = temp_pdf_path.replace(".pdf", ".docx")
+                
+                try:
+                    # ทำการแปลงไฟล์
+                    cv = Converter(temp_pdf_path)
+                    cv.convert(temp_docx_path)
+                    cv.close()
+                    
+                    # อ่านไฟล์ Word ที่แปลงเสร็จแล้วเตรียมให้ดาวน์โหลด
+                    with open(temp_docx_path, "rb") as docx_file:
+                        docx_bytes = docx_file.read()
+                        
+                    st.success("✅ แปลงไฟล์สำเร็จแล้ว!")
+                    st.download_button(
+                        label="⬇️ ดาวน์โหลดไฟล์ Word (.docx)",
+                        data=docx_bytes,
+                        file_name="converted_document.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    )
+                except Exception as e:
+                    st.error(f"❌ เกิดข้อผิดพลาดในการแปลงไฟล์: {e}")
+                finally:
+                    # ลบไฟล์ชั่วคราวทิ้งเพื่อคืนพื้นที่ให้เซิร์ฟเวอร์
+                    if os.path.exists(temp_pdf_path):
+                        os.remove(temp_pdf_path)
+                    if os.path.exists(temp_docx_path):
+                        os.remove(temp_docx_path)
