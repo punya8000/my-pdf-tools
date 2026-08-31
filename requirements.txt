@@ -2,3 +2,4 @@ streamlit
 pypdf
 Pillow
 PyMuPDF
+pdf2docx
